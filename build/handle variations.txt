@@ -1,0 +1,136 @@
+To handle variations in questions effectively, the chatbot should incorporate mechanisms to manage both size variations (e.g., extremely long questions) and relevance filtering (e.g., ignoring irrelevant queries). Here's a breakdown of how to tackle these challenges:
+
+1. Handle Extremely Long Questions
+1.1 Preprocessing for Long Questions
+When a user submits an overly long question, preprocess the query to:
+
+Truncate unnecessary details while preserving key information.
+Use summarization techniques to reduce length.
+Steps:
+Check the length of the input.
+If it exceeds a threshold (e.g., 300 characters), use NLP-based summarization.
+Extract intent and key entities from the summarized query.
+Code Example for Summarizing Long Questions
+
+from transformers import pipeline
+
+# Load a text summarization model
+summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
+
+def preprocess_query(query):
+    max_length = 300
+    if len(query) > max_length:
+        # Summarize the query
+        summary = summarizer(query, max_length=50, min_length=20, do_sample=False)
+        return summary[0]["summary_text"]
+    return query
+
+# Example of a long question
+long_query = """Can you please explain in great detail how I would go about setting up a new source in Segment, including every single step from logging into the system, navigating to the dashboard, finding the sources section, and then completing the configuration process?"""
+
+short_query = preprocess_query(long_query)
+print("Processed Query:", short_query)
+1.2 Breaking Down Complex Questions
+If the query contains multiple sub-questions:
+
+Decompose it into manageable chunks.
+Answer the primary task first and provide additional guidance for other parts.
+Example Approach
+Detect conjunctions or separators like "and," "or," or "including."
+Split the query and prioritize the main intent.
+2. Filter Irrelevant Questions
+To handle irrelevant questions, implement a relevance classification system to distinguish CDP-related questions from unrelated ones.
+
+2.1 Use a Classifier
+Train or fine-tune a binary text classification model to detect relevance. The classifier should categorize questions into:
+
+Relevant: Related to Segment, mParticle, Lytics, or Zeotap.
+Irrelevant: Anything else.
+Tools:
+Pre-trained models like OpenAI GPT or Hugging Face's distilbert-base-uncased-finetuned-sst-2.
+Example Code for Relevance Classification
+
+from transformers import pipeline
+
+# Load a sentiment analysis model for binary classification
+classifier = pipeline("text-classification", model="distilbert-base-uncased-finetuned-sst-2")
+
+def is_relevant_query(query):
+    relevance_keywords = ["Segment", "mParticle", "Lytics", "Zeotap"]
+    if any(keyword in query for keyword in relevance_keywords):
+        return True
+
+    # Use the classifier as a fallback
+    result = classifier(query)
+    return result[0]["label"] == "LABEL_1"  # Assuming LABEL_1 is 'relevant'
+
+# Test the relevance
+query1 = "How do I set up a new source in Segment?"
+query2 = "Which movie is releasing this week?"
+
+print("Query 1 Relevant:", is_relevant_query(query1))
+print("Query 2 Relevant:", is_relevant_query(query2))
+2.2 Predefined Rules for Immediate Filtering
+Implement rule-based filtering for known irrelevant topics (e.g., movies, sports):
+
+If the query contains unrelated keywords like "movie," "sports," or "celebrity," immediately classify it as irrelevant.
+Code Example for Rule-Based Filtering
+
+def is_irrelevant(query):
+    irrelevant_keywords = ["movie", "sports", "celebrity", "weather", "game"]
+    return any(keyword in query.lower() for keyword in irrelevant_keywords)
+
+query = "Which movie is releasing this week?"
+if is_irrelevant(query):
+    print("This question is not relevant to CDPs.")
+else:
+    print("Processing the query...")
+2.3 Feedback for Irrelevant Queries
+If a question is classified as irrelevant, provide a polite response to redirect the user:
+
+Example: "This chatbot specializes in answering questions about Segment, mParticle, Lytics, and Zeotap. For other topics, please consult a general-purpose assistant."
+3. Unified Handling Flow
+Complete Process
+Preprocess Query:
+Summarize or truncate overly long questions.
+Break down complex queries.
+Classify Relevance:
+Apply keyword matching, rule-based filters, and/or relevance classification.
+Respond Appropriately:
+If relevant, process the query and retrieve the answer.
+If irrelevant, respond with a polite redirection.
+End-to-End Code Example
+
+def handle_user_query(query):
+    # Step 1: Preprocess query
+    query = preprocess_query(query)
+    
+    # Step 2: Check for relevance
+    if is_irrelevant(query):
+        return "This chatbot specializes in answering questions about Segment, mParticle, Lytics, and Zeotap. Please ask questions related to these platforms."
+    
+    # Step 3: Extract platform and task
+    platform, task = extract_platform_and_task(query)
+    if not platform or not task:
+        return "Sorry, I couldn't understand your query. Can you rephrase it?"
+
+    # Step 4: Retrieve answer from documentation
+    results = search_docs(platform, task)
+    if results:
+        return results[0]["_source"]["content"]
+    else:
+        return "I couldn't find information on that. Please check the official documentation."
+
+# Test the function
+query1 = "How do I set up a new source in Segment?"
+query2 = "Tell me which movies are releasing next week."
+
+print(handle_user_query(query1))
+print(handle_user_query(query2))
+4. Additional Enhancements
+4.1 Multi-Turn Conversations
+Allow the chatbot to clarify or refine the query if it doesn’t understand.
+Example: "Do you mean setting up a source in Segment or mParticle?"
+4.2 Continuous Learning
+Store user queries and flagged irrelevant responses.
+Periodically review and update relevance filters and the knowledge base.
