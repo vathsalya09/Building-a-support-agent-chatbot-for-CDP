@@ -1,2 +1,522 @@
-# Building-a-support-agent-chatbot-for-CDP
-How to questions
+Introduction
+I clearly  read the assginment description and arrived at an understanding ,here is a brief pointers so as to make sure I don't miss on anything important.
+
+Most of the code I have written would be lengthy, so I made sure the README doesn't :D. Everything would mostly be in bullets hereafter:
+Unittests are written keeping in mind all edge cases that could occur, there are positive as well as negative test cases. Coverage too is kept above 80%.
+This README will talk about the technical parts first, then about the solution. And later about all miscellenous things, which are although technical, yet I put them in the "non-technical" bracket. They talk more about my thinking and approach towards the solution, and a brief discussion on the design is also present.
+
+
+
+Installation and How to Run the CDP Chatbot Code
+Below are step-by-step instructions to install and run the CDP Chatbot locally.
+
+1. Prerequisites
+Ensure the following are installed on your system:
+
+Python (Version 3.8 or higher)
+Pip (Python package manager)
+Node.js and npm (Optional: If a separate frontend is used)
+Git (For cloning the repository)
+2. Clone the Repository
+Use Git to clone the project:
+
+bash
+Copy code
+git clone https://github.com/your-repo/cdp-chatbot.git
+cd cdp-chatbot
+3. Set Up the Backend
+Step 1: Create a Virtual Environment
+Create and activate a Python virtual environment:
+
+
+# For macOS/Linux:
+python3 -m venv venv
+source venv/bin/activate
+
+# For Windows:
+python -m venv venv
+venv\Scripts\activate
+Step 2: Install Dependencies
+Install the Python dependencies from requirements.txt:
+
+pip install -r requirements.txt
+Step 3: Set Up Environment Variables
+Create a .env file in the project root and add the following:
+
+
+FLASK_APP=app.py
+FLASK_ENV=development
+OPENAI_API_KEY=your_openai_api_key_here
+SECRET_KEY=your_secret_key_here
+Replace your_openai_api_key_here with your OpenAI GPT API key.
+
+Step 4: Initialize the Database
+(Optional, if the app uses a database):
+
+
+flask db init
+flask db migrate
+flask db upgrade
+4. Start the Backend
+Run the Flask application:
+
+
+flask run
+The backend should now be running at:
+
+
+http://127.0.0.1:5000
+5. Set Up the Frontend
+If a separate frontend is included (e.g., React or static files):
+
+Step 1: Navigate to the Frontend Directory
+
+cd static/
+Step 2: Install Dependencies
+
+npm install
+Step 3: Start the Frontend
+
+npm start
+The frontend should now be running at:
+
+
+http://localhost:3000
+6. Test the Application
+Open the frontend in your browser (if applicable).
+Use tools like Postman or cURL to test API endpoints directly.
+Example with cURL:
+
+curl -X POST http://127.0.0.1:5000/api/ask \
+-H "Content-Type: application/json" \
+-d '{
+  "platform": "Segment",
+  "query": "How do I set up a new source?"
+}'
+7. Deployment
+To deploy the chatbot:
+
+Use Heroku, Render, or AWS for hosting the backend.
+For Heroku:
+Install Heroku CLI: npm install -g heroku
+Login: heroku login
+Deploy:
+
+git add .
+git commit -m "Initial commit"
+heroku create
+git push heroku main
+8. Additional Notes
+Testing: Run tests with:
+
+pytest
+Documentation: Access API documentation (if implemented with Swagger) at:
+
+http://127.0.0.1:5000/docs
+
+
+
+
+
+
+
+
+
+
+
+Here’s a brief solution to implement and test the chatbot
+1. Backend Implementation
+Use Python + Flask for the server.
+Implement an endpoint (/ask) that:
+Accepts JSON input with platform, feature, and query.
+Searches a predefined knowledge base for advanced CDP-related steps.
+Falls back to OpenAI GPT API for unknown queries.
+Store platform-specific features and steps (e.g., integrations) in the knowledge base.
+2. Local Testing
+Save the Python code as app.py.
+Install dependencies:
+
+pip install flask openai
+Run the app:
+
+python app.py
+Test using Postman or curl:
+Send a POST request to http://127.0.0.1:5000/ask.
+Example JSON input:
+
+{
+    "platform": "Segment",
+    "feature": "Google Ads",
+    "query": "integrate Segment with Google Ads"
+}
+3. Deployment
+Option 1: Deploy on Heroku.
+Add requirements.txt and Procfile.
+Push to Heroku using Git.
+Option 2: Use Render or Vercel for easy deployment of Flask apps.
+4. Extend Functionality
+Frontend: Build a web interface using React or plain HTML/JavaScript.
+Advanced Features:
+Add visual aids (diagrams or charts).
+Include documentation links in responses.
+Handle unsupported queries gracefully.
+Caching: Use Redis for frequent queries to reduce API calls.
+
+
+
+
+
+Solution Overview for a CDP How-To Chatbot
+This chatbot provides guidance on advanced tasks in Segment, mParticle, Lytics, and Zeotap. Here's the plan:
+
+1. Core Features
+"How-to" Questions: Responds to user queries like "How do I set up a source in Segment?" using predefined workflows or AI-based answers.
+Cross-CDP Comparisons: Explains differences in features or processes between CDPs.
+Advanced Tasks: Handles complex configurations (e.g., integrations or audience segmentation).
+Dynamic Information Retrieval: Extracts relevant information from official documentation when needed.
+2. Technical Approach
+Backend:
+Use Python (Flask) to build the API.
+Implement a knowledge base for common tasks and fallback to the OpenAI GPT API for dynamic answers.
+Frontend:
+Create a web interface for user interactions using React or plain HTML/JavaScript.
+Data Handling:
+Predefine workflows for CDP features in JSON format.
+Support both structured answers and conversational responses.
+3. Deployment
+Deploy the chatbot on Heroku, Render, or Vercel for public access.
+Ensure scalability with cloud hosting and caching (e.g., Redis) for frequent queries.
+4. Future Enhancements
+Add data visualization for metrics and steps.
+Support integration with Slack, Teams, or other platforms for accessibility.
+Enable saving and exporting of query results for users.
+This solution ensures accurate, scalable, and user-friendly CDP guidance.
+
+
+
+
+
+
+Code Structure for the CDP Chatbot Application
+Below is the suggested file structure, along with descriptions of each file and directory:
+
+cdp-chatbot/
+│
+├── app.py                        # Main Flask application to handle API requests
+├── requirements.txt              # Python dependencies for the project
+├── Procfile                      # Heroku deployment configuration
+├── README.md                     # Project description and setup instructions
+│
+├── templates/                    # HTML templates for the frontend (if using Flask templates)
+│   ├── index.html                # Main web interface for the chatbot
+│
+├── static/                       # Static files for the frontend
+│   ├── css/                      # Stylesheets for the web UI
+│   │   └── styles.css            # Main CSS file for the chatbot UI
+│   ├── js/                       # JavaScript files for frontend logic
+│   │   └── chatbot.js            # Handles API calls and dynamic UI updates
+│   └── images/                   # Images or icons for the UI (if needed)
+│
+├── knowledge_base/               # Contains predefined workflows and data
+│   ├── segment.json              # Predefined steps for Segment
+│   ├── mparticle.json            # Predefined steps for mParticle
+│   ├── lytics.json               # Predefined steps for Lytics
+│   └── zeotap.json               # Predefined steps for Zeotap
+│
+├── utils/                        # Utility functions for the backend
+│   ├── response_generator.py     # Generates responses using the knowledge base or OpenAI API
+│   ├── data_parser.py            # Parses and validates input data
+│   └── doc_extractor.py          # Extracts relevant information from documentation
+│
+├── tests/                        # Unit tests for the application
+│   ├── test_app.py               # Tests for the Flask app and endpoints
+│   ├── test_knowledge_base.py    # Tests for knowledge base logic
+│   └── test_utils.py             # Tests for utility functions
+│
+└── deployment/                   # Deployment scripts and configuration
+    ├── Dockerfile                # Docker configuration for containerized deployment
+    └── heroku.yml                # Optional Heroku configuration for advanced setups
+
+
+File Descriptions
+app.py: Core Flask application. Manages routes, user queries, and response generation.
+requirements.txt: Specifies Python dependencies (Flask, OpenAI SDK, etc.).
+Procfile: Defines the startup command for Heroku deployment (web: gunicorn app:app).
+templates/index.html: A simple HTML file for the chatbot UI.
+static/: Contains static frontend assets (CSS, JavaScript, images).
+chatbot.js makes API requests to the backend and displays results.
+knowledge_base/: Stores JSON files with predefined workflows for each CDP.
+utils/: Utility functions:
+response_generator.py: Combines knowledge base lookups with OpenAI GPT API for dynamic responses.
+data_parser.py: Validates and processes user inputs.
+doc_extractor.py: Scrapes or searches CDP documentation for relevant content.
+tests/: Contains unit tests for various components of the application.
+deployment/: Configuration files for deployment:
+Dockerfile: Enables containerized deployment.
+heroku.yml: Advanced setup for Heroku.
+This modular structure ensures the application is maintainable, testable, and easily extendable. Let me know if you'd like sample code for any of these files!
+
+
+
+
+
+Below is a suggested database design for the chatbot application. It organizes key entities such as user queries, predefined knowledge base content, and user session tracking.
+
+Database Tables
+1. Users
+Tracks user-related information (optional, if authentication is required).
+
+Field Name	              Type	        Description
+id	Integer               (PK)	           Unique identifier for each user.
+username	               String	            Username of the user (optional).
+email	                  String	           User's email (optional).
+created_at	             Timestamp	        Timestamp of when the user was created.
+updated_at	             Timestamp	       Last time the user profile was updated.
+
+
+
+2. Knowledge Base
+Stores predefined workflows or steps for specific CDP platforms and features.
+
+Field Name	             Type	                         Description
+id	                    Integer (PK)	                Unique identifier for each knowledge item.
+platform	               String	              Name of the CDP platform (e.g., Segment).
+feature                 	String	                 Feature or module (e.g., Integrations).
+query	                    String	              Query description (e.g., "Google Ads setup").
+steps                 	Text/JSON             	Predefined step-by-step instructions.
+created_at	             Timestamp	             Timestamp of when the entry was created.
+updated_at	             Timestamp	              Last update time of the knowledge entry.
+3. Queries
+Tracks user queries and their corresponding responses.
+
+Field Name	               Type              	Description
+id	                         Integer (PK)          	Unique identifier for each query.
+user_id	                   Integer (FK)         	User who submitted the query (optional).
+platform	                   String           	CDP platform referenced in the query.
+query_text	                Text	               Text of the user’s question.
+response_text	              Text	              Chatbot’s response to the query.
+response_type	                String	             Indicates if the response was from "Knowledge Base" or "GPT".
+created_at                	Timestamp             	Timestamp of the query submission.
+4. Sessions
+Tracks user interactions during a session.
+
+Field Name	                Type	           Description
+id	                       Integer (PK)	        Unique identifier for the session.
+user_id                     	Integer (FK)	       Associated user (optional).
+session_token	                String               	Unique token for the session.
+created_at	               Timestamp	               Session start time.
+expires_at	            Timestamp	                  Session expiration time.
+5. Logs
+Tracks application errors, warnings, and interactions for debugging or analytics.
+
+Field Name	                 Type                    	Description
+id	                        Integer (PK)	                 Unique identifier for each log entry.
+level	                         String                   	Log level (INFO, WARNING, ERROR, etc.).
+message	                    Text                          	Log message.
+created_at	              Timestamp	              Timestamp of the log entry.
+Entity-Relationship (ER) Diagram Overview
+Users are associated with Queries and Sessions (optional if you want user authentication).
+Knowledge Base provides predefined responses tied to platforms and features.
+Queries store user inputs and the chatbot’s responses.
+Logs monitor the system’s performance and errors.
+Database Options
+Relational Database: Use PostgreSQL or MySQL for structured and queryable data.
+NoSQL Database: Use MongoDB for flexible, JSON-based knowledge base storage.
+Hybrid Approach: Use a relational database for users and queries, and a NoSQL database for the knowledge base.
+
+
+
+API Design for the CDP How-To Chatbot
+Below is a detailed design for the API endpoints needed to support the chatbot's functionality:
+
+Base URL
+
+https://cdp-chatbot-api.example.com
+1. User Authentication (Optional)
+POST /auth/register
+Registers a new user (if authentication is required).
+
+Request Body:
+
+{
+  "username": "john_doe",
+  "email": "john.doe@example.com",
+  "password": "securepassword123"
+}
+Response:
+
+{
+  "message": "User registered successfully",
+  "user_id": 1
+}
+POST /auth/login
+Logs in a user and returns a session token.
+
+Request Body:
+
+{
+  "email": "john.doe@example.com",
+  "password": "securepassword123"
+}
+Response:
+
+{
+  "message": "Login successful",
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
+2. Query Handling
+POST /api/ask
+Processes user questions and returns the answer.
+
+Request Body:
+
+{
+  "platform": "Segment",
+  "query": "How do I set up a new source?",
+  "feature": "Sources"
+}
+Response (From Knowledge Base):
+
+{
+  "response": "To set up a new source in Segment, go to the Sources tab, click 'Add Source', and follow the prompts.",
+  "source": "Knowledge Base"
+}
+Response (From GPT API):
+
+{
+  "response": "You can set up a new source in Segment by navigating to the dashboard, clicking on 'Add Source', and following the configuration steps.",
+  "source": "AI"
+}
+3. Knowledge Base Management
+GET /api/knowledge-base
+Retrieves all entries in the knowledge base.
+
+Response:
+
+[
+  {
+    "id": 1,
+    "platform": "Segment",
+    "feature": "Integrations",
+    "query": "Google Ads setup",
+    "steps": "Navigate to the Integrations tab..."
+  },
+  {
+    "id": 2,
+    "platform": "mParticle",
+    "feature": "Identity Resolution",
+    "query": "Resolve user profiles",
+    "steps": "Enable identity resolution in settings..."
+  }
+]
+POST /api/knowledge-base
+Adds a new entry to the knowledge base.
+
+Request Body:
+
+{
+  "platform": "Lytics",
+  "feature": "Audience Segments",
+  "query": "Build a custom segment",
+  "steps": "Navigate to the Audience Builder, select filters, and save."
+}
+Response:
+
+{
+  "message": "Knowledge base entry created successfully",
+  "entry_id": 3
+}
+PUT /api/knowledge-base/:id
+Updates an existing knowledge base entry.
+
+Request Body:
+
+{
+  "steps": "Updated step-by-step instructions..."
+}
+Response:
+
+{
+  "message": "Knowledge base entry updated successfully"
+}
+DELETE /api/knowledge-base/:id
+Deletes a knowledge base entry.
+
+Response:
+
+{
+  "message": "Knowledge base entry deleted successfully"
+}
+4. Query History
+GET /api/queries
+Retrieves a list of all queries made by a user.
+
+Headers:
+Authorization: Bearer <token>
+Response:
+
+[
+  {
+    "id": 1,
+    "platform": "Segment",
+    "query_text": "How do I set up a new source?",
+    "response_text": "To set up a new source in Segment...",
+    "created_at": "2025-01-12T10:00:00Z"
+  },
+  {
+    "id": 2,
+    "platform": "Lytics",
+    "query_text": "How to create an audience?",
+    "response_text": "Go to Audience Builder...",
+    "created_at": "2025-01-12T10:05:00Z"
+  }
+]
+5. Cross-CDP Comparison
+POST /api/compare
+Compares a feature or process across multiple CDPs.
+
+Request Body:
+
+{
+  "query": "How does Segment's audience creation compare to Lytics'?",
+  "platforms": ["Segment", "Lytics"]
+}
+Response:
+
+{
+  "comparison": {
+    "Segment": "Audience creation is done via the Sources tab...",
+    "Lytics": "Audience creation is achieved using the Audience Builder..."
+  }
+}
+6. Logs (For Admins)
+GET /api/logs
+Retrieves system logs for debugging or analytics.
+
+Response:
+
+[
+  {
+    "id": 1,
+    "level": "INFO",
+    "message": "Query processed successfully",
+    "created_at": "2025-01-12T10:00:00Z"
+  },
+  {
+    "id": 2,
+    "level": "ERROR",
+    "message": "Knowledge base entry not found",
+    "created_at": "2025-01-12T10:05:00Z"
+  }
+]
+Key Notes
+Authentication: Use JWT for user authentication if needed.
+Knowledge Base Management: Admin-only endpoints for managing knowledge base entries.
+Fallback Mechanism: If no answer is found in the knowledge base, fallback to OpenAI GPT API.
+Scalability: Use Redis for caching frequently asked questions to reduce API call latency.
+Deployment: Use RESTful principles, and host on Heroku, AWS, or Render.
+
+
+Feedback
+ Even though the assignment was a bit lengthy, it has many tricky parts which are easier said than done and could be tackled . The availability gaurantee, redundancy mechanism, caching for efficient reads, couldn't be addressed in such a short span of time.
+
